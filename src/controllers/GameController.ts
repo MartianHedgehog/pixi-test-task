@@ -21,6 +21,8 @@ export class GameController implements IGameController {
       this.shapeView = new ShapeView(this.app!.stage);
       this.setupEventListeners();
 
+      this.uiView.updateControls(this.model.spawnRate, this.model.gravity);
+
       this.app!.ticker.add(this.gameUpdate, this);
       this.app!.ticker.maxFPS = 60;
     } catch (error) {
