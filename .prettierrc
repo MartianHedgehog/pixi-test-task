@@ -1,0 +1,11 @@
+{
+  "printWidth": 100,
+  "singleQuote": true,
+  "trailingComma": "all",
+  "eslint arrow-body-style": ["error", "never"],
+  "no-confusing-arrow": ["error", {"allowParens": true}],
+  "arrowParens": "always",
+  "plugins": ["@trivago/prettier-plugin-sort-imports"],
+  "importOrderSeparation": false,
+  "importOrderSortSpecifiers": true
+}

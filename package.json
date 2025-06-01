@@ -1,0 +1,16 @@
+{
+  "name": "pixi-test-task",
+  "type": "module",
+  "scripts": {
+    "build": "bun build src/main.ts --outdir ./dist/ --minify",
+    "watch": "bun build src/main.ts --outdir ./dist/ --watch"
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "pixi.js": "^8.9.2",
+    "prettier": "^3.5.3"
+  }
+}
