@@ -67,7 +67,6 @@ export class GameController implements IGameController {
     // Get all shapes of the same type (except the clicked one)
     this.model.shapes.forEach((shape) => {
       if (shape.type === shapeType && shape.id !== clickedShape.id) {
-        console.log(shape.type, 'TYPE');
         shape.color = this.generateRandomColor();
       }
     });

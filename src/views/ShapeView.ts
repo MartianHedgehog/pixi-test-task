@@ -61,94 +61,68 @@ export class ShapeView implements IShapeView {
 
   private drawRandomComplexShape(graphics: PIXI.Graphics, size: number, shapeId: string): void {
     const radius = size / 2;
-
-    // Turn the shape ID into a number we can use
     const shapeNumber = this.convertIdToNumber(shapeId);
 
-    // That number to decide how the shape looks
-    const numSides = 4 + (shapeNumber % 6); // Between 4-9 sides
-    const isRounded = shapeNumber % 10 > 5; // 40% chance of curves
-
-    if (isRounded) {
-      this.drawRoundedShape(graphics, radius, numSides, shapeNumber);
-    } else {
-      this.drawAngularShape(graphics, radius, numSides, shapeNumber);
-    }
+    this.drawCloudShape(graphics, radius, shapeNumber);
   }
 
-  // Convert text ID to a consistent number
+  private drawCloudShape(graphics: PIXI.Graphics, radius: number, shapeNumber: number): void {
+    const numBumps = 6 + (shapeNumber % 4); // 6-9 bumps for a cloud
+    const baseRadius = radius * 0.7;
+
+    const points = [];
+    for (let i = 0; i < numBumps; i++) {
+      points.push(this.calculateCloudPoint(i, numBumps, baseRadius, radius, shapeNumber));
+    }
+
+    graphics.moveTo(points[0].x, points[0].y);
+
+    // Draw smooth curves through all points
+    for (let i = 0; i < numBumps; i++) {
+      const currentPoint = points[i];
+      const nextPoint = points[(i + 1) % numBumps]; // Wrap around to first point
+
+      // Create smooth control points
+      const midX = (currentPoint.x + nextPoint.x) / 2;
+      const midY = (currentPoint.y + nextPoint.y) / 2;
+
+      // Calculate outward bulge
+      const angle = Math.atan2(midY, midX); // Angle from center
+      const bulgeDistance = 15 + ((shapeNumber * i * 7) % 25); // 15-40px bulge
+
+      const controlX = midX + Math.cos(angle) * bulgeDistance;
+      const controlY = midY + Math.sin(angle) * bulgeDistance;
+
+      graphics.quadraticCurveTo(controlX, controlY, nextPoint.x, nextPoint.y);
+    }
+
+    graphics.closePath();
+  }
+
+  private calculateCloudPoint(
+    pointIndex: number,
+    numBumps: number,
+    baseRadius: number,
+    maxRadius: number,
+    shapeNumber: number,
+  ): { x: number; y: number } {
+    const angle = (pointIndex * 2 * Math.PI) / numBumps;
+
+    const variation = ((shapeNumber * pointIndex * 3) % 50) / 100; // 0 to 0.5
+    const pointRadius = baseRadius + (maxRadius - baseRadius) * variation;
+
+    const x = Math.cos(angle) * pointRadius;
+    const y = Math.sin(angle) * pointRadius;
+
+    return { x, y };
+  }
+
   private convertIdToNumber(shapeId: string): number {
     let number = 0;
     for (let i = 0; i < shapeId.length; i++) {
       number += shapeId.charCodeAt(i); // Add up ASCII values
     }
     return number;
-  }
-
-  private calculateShapePoint(
-    pointIndex: number,
-    numSides: number,
-    radius: number,
-    shapeNumber: number,
-  ): { x: number; y: number; angle: number } {
-    const angle = (pointIndex * 2 * Math.PI) / numSides;
-
-    // Make each point a bit different using the shape number
-    const variation = ((shapeNumber * pointIndex) % 100) / 200; // 0 to 0.5
-    const pointRadius = radius * (0.6 + variation);
-
-    const x = Math.cos(angle) * pointRadius;
-    const y = Math.sin(angle) * pointRadius;
-
-    return { x, y, angle };
-  }
-
-  // Draw a shape with smooth curves
-  private drawRoundedShape(
-    graphics: PIXI.Graphics,
-    radius: number,
-    numSides: number,
-    shapeNumber: number,
-  ): void {
-    graphics.moveTo(radius, 0);
-
-    for (let i = 1; i <= numSides; i++) {
-      const point = this.calculateShapePoint(i, numSides, radius, shapeNumber);
-
-      // Decide if this segment should be curved
-      if ((shapeNumber * i) % 3 === 0) {
-        // Add a curve - control point is halfway between points
-        const prevPoint = this.calculateShapePoint(i - 1, numSides, radius, shapeNumber);
-        const midAngle = (prevPoint.angle + point.angle) / 2;
-        const controlRadius = radius * 0.4;
-
-        const controlX = Math.cos(midAngle) * controlRadius;
-        const controlY = Math.sin(midAngle) * controlRadius;
-
-        graphics.quadraticCurveTo(controlX, controlY, point.x, point.y);
-      } else {
-        graphics.lineTo(point.x, point.y);
-      }
-    }
-    graphics.closePath();
-  }
-
-  // Draw a shape with straight edges
-  private drawAngularShape(
-    graphics: PIXI.Graphics,
-    radius: number,
-    numSides: number,
-    shapeNumber: number,
-  ): void {
-    const points = [];
-
-    for (let i = 0; i < numSides; i++) {
-      const point = this.calculateShapePoint(i, numSides, radius, shapeNumber);
-
-      points.push(point.x, point.y);
-    }
-
-    graphics.poly(points);
   }
 
   public render(shapes: IShape[]): void {
