@@ -81,7 +81,7 @@ export class GameModel implements IGameModel {
   }
 
   public setGravity(gravity: number): void {
-    this.gravity = Math.max(0, Math.min(10.0, gravity));
+    this.gravity = Math.max(0.1, Math.min(10.0, gravity));
   }
 
   public getShapeCount(): number {
